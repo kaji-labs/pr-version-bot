@@ -30,9 +30,27 @@ Create these labels in your repository:
 | `release:patch` | `1.0.0` → `1.0.1`      |
 | `release:none`  | Skips release entirely |
 
-## Example workflow
+## Install
 
 <!-- VERSIONBOT:START -->
+
+> Current stable release: **v0.6.0**
+
+**Pinned version (recommended):**
+
+```yaml
+- uses: kaji-labs/pr-version-bot@v0.6.0
+```
+
+**Major version alias:**
+
+```yaml
+- uses: kaji-labs/pr-version-bot@v0
+```
+
+<!-- VERSIONBOT:END -->
+
+## Example workflow
 
 ```yaml
 name: Release
@@ -51,16 +69,14 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: kaji-labs/pr-version-bot@v1
+      - uses: kaji-labs/pr-version-bot@v0.6.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
-
-<!-- VERSIONBOT:END -->
 
 ## Inputs
 

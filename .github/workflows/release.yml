@@ -28,3 +28,5 @@ jobs:
           version-file: VERSION.md
           changelog-file: CHANGELOG.md
           default-bump: patch
+          generate-badge: 'true'
+          update-readme: 'true'
