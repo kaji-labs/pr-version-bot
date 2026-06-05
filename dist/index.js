@@ -29446,9 +29446,9 @@ function mergeConfig(fileConfig, inputs) {
     targetBranch: inp("target-branch") || fileConfig.targetBranch || "main",
     commitMessageTemplate: (() => {
       const commitMessageTemplate = inp("commit-message-template") || fileConfig.commitMessageTemplate || "chore(release): {tag}";
-      if (commitMessageTemplate.length > 500) {
+      if (commitMessageTemplate.length > 1e3) {
         throw new Error(
-          `commit-message-template must be 500 characters or fewer (got ${commitMessageTemplate.length})`
+          `commit-message-template must be 1000 characters or fewer (got ${commitMessageTemplate.length})`
         );
       }
       return commitMessageTemplate;

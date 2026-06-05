@@ -313,25 +313,25 @@ describe('mergeConfig', () => {
     expect(r.tagPrefix).toBe('v');
   });
 
-  // S-004: commitMessageTemplate length validation (cap: 500 chars)
-  it('accepts commitMessageTemplate of exactly 500 characters', () => {
-    const template = 'a'.repeat(500);
+  // S-004: commitMessageTemplate length validation (cap: 1000 chars)
+  it('accepts commitMessageTemplate of exactly 1000 characters', () => {
+    const template = 'a'.repeat(1000);
     const r = mergeConfig({}, { ...DEFAULT_INPUTS, 'commit-message-template': template });
     expect(r.commitMessageTemplate).toBe(template);
   });
 
-  it('throws when commitMessageTemplate exceeds 500 characters', () => {
-    const template = 'a'.repeat(501);
+  it('throws when commitMessageTemplate exceeds 1000 characters', () => {
+    const template = 'a'.repeat(1001);
     expect(() =>
       mergeConfig({}, { ...DEFAULT_INPUTS, 'commit-message-template': template })
-    ).toThrow('commit-message-template must be 500 characters or fewer');
+    ).toThrow('commit-message-template must be 1000 characters or fewer');
   });
 
   it('includes actual length in commitMessageTemplate error', () => {
-    const template = 'a'.repeat(600);
+    const template = 'a'.repeat(1100);
     expect(() =>
       mergeConfig({}, { ...DEFAULT_INPUTS, 'commit-message-template': template })
-    ).toThrow('600');
+    ).toThrow('1100');
   });
 
   // S-022: validateBumpType error path
