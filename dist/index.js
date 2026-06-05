@@ -26978,14 +26978,26 @@ async function pushReleaseBranch(branchName) {
 async function openReleasePr(token, branchName, targetBranch, title, body) {
   const octokit = getOctokit(token);
   const { owner, repo } = context2.repo;
-  const pr = await octokit.rest.pulls.create({
-    owner,
-    repo,
-    title,
-    body,
-    head: branchName,
-    base: targetBranch
-  });
+  let pr;
+  try {
+    pr = await octokit.rest.pulls.create({
+      owner,
+      repo,
+      title,
+      body,
+      head: branchName,
+      base: targetBranch
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("not permitted to create or approve pull requests")) {
+      warning(
+        'Could not open release PR: GitHub Actions is not allowed to create pull requests in this repository. Enable it under Settings \u2192 Actions \u2192 General \u2192 "Allow GitHub Actions to create and approve pull requests". The release tag and GitHub Release were created successfully.'
+      );
+      return "";
+    }
+    throw err;
+  }
   await octokit.rest.issues.addLabels({
     owner,
     repo,
@@ -30000,8 +30012,10 @@ ${dryRunEntry}`);
 - \`${config.changelogFile}\` updated`;
       const prBase = config.releasePrBase || config.targetBranch;
       const prUrl = await openReleasePr(token, releaseBranch, prBase, prTitle, prBody);
-      info(`Release PR created: ${prUrl}`);
-      setOutput("release-pr-url", prUrl);
+      if (prUrl) {
+        info(`Release PR created: ${prUrl}`);
+        setOutput("release-pr-url", prUrl);
+      }
     } else {
       await commitRelease(filesToCommit, message);
       await createTag(tag);

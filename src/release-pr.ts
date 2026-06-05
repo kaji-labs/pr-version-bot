@@ -1,3 +1,4 @@
+import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as github from '@actions/github';
 
@@ -24,14 +25,28 @@ export async function openReleasePr(
   const octokit = github.getOctokit(token);
   const { owner, repo } = github.context.repo;
 
-  const pr = await octokit.rest.pulls.create({
-    owner,
-    repo,
-    title,
-    body,
-    head: branchName,
-    base: targetBranch,
-  });
+  let pr: Awaited<ReturnType<typeof octokit.rest.pulls.create>>;
+  try {
+    pr = await octokit.rest.pulls.create({
+      owner,
+      repo,
+      title,
+      body,
+      head: branchName,
+      base: targetBranch,
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('not permitted to create or approve pull requests')) {
+      core.warning(
+        'Could not open release PR: GitHub Actions is not allowed to create pull requests in this repository. ' +
+          'Enable it under Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests". ' +
+          'The release tag and GitHub Release were created successfully.'
+      );
+      return '';
+    }
+    throw err;
+  }
 
   // Apply release:none label to prevent recursive release triggering
   await octokit.rest.issues.addLabels({

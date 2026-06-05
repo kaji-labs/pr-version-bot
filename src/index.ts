@@ -278,8 +278,10 @@ export async function run(): Promise<void> {
       const prBase = config.releasePrBase || config.targetBranch;
       const prUrl = await openReleasePr(token, releaseBranch, prBase, prTitle, prBody);
 
-      core.info(`Release PR created: ${prUrl}`);
-      core.setOutput('release-pr-url', prUrl);
+      if (prUrl) {
+        core.info(`Release PR created: ${prUrl}`);
+        core.setOutput('release-pr-url', prUrl);
+      }
     } else {
       await commitRelease(filesToCommit, message);
       await createTag(tag);
