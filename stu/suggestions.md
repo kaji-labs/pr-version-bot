@@ -102,6 +102,29 @@ Currently only one Slack and one Discord URL can be configured. Teams often want
 
 `createRelease` always passes `prerelease: false`. When the bump type is `alpha`, `beta`, or `rc`, the GitHub Release should be marked as a pre-release automatically (`prerelease: true`). This makes the Releases page cleaner and prevents Shields.io `latest` badges from picking up pre-release versions. Add a simple `bump === 'alpha' || bump === 'beta' || bump === 'rc'` check.
 
+### S-025 — Auto-update all version refs in README on release (`readme.ts` / `index.ts`)
+
+The `## Install` section is kept current via the VERSIONBOT markers and `update-readme: true`. However, version refs embedded in other README sections — such as the `## Example workflow` block — still show a static, manually-maintained version string (currently `@v0.9.1`). Any new release makes these stale immediately.
+
+Extend `applyReadmeUpdate` (or add a companion function `updateVersionRefs`) that does a global regex replacement of the previous action ref in the README file. After each release, replace all occurrences of `kaji-labs/pr-version-bot@{previousTag}` with `kaji-labs/pr-version-bot@{newTag}` in the file before committing. The replacement is safe because the old version string is specific enough to avoid false matches. This should be opt-in via the existing `update-readme` flag — no new input needed. The function should also handle pre-release tags (`@v1.0.0-alpha.1`), replacing them with the new tag whether that tag is stable or another pre-release.
+
+**Implementation sketch:**
+
+```typescript
+function updateVersionRefs(content: string, previousTag: string, newTag: string): string {
+  const escaped = previousTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return content.replace(new RegExp(escaped, 'g'), newTag);
+}
+```
+
+Call in `applyReadmeUpdate` after the marker block replacement, before writing the file.
+
+### S-026 — Automatically mark GitHub Releases as pre-release and set the `latest` flag correctly (`github-release.ts`)
+
+Currently all GitHub Releases are created with `prerelease: false` and `make_latest: 'true'` (GitHub default). When a release is for an `alpha`, `beta`, or `rc` channel, this causes two problems: (1) the release incorrectly appears as the "Latest" release on the repo homepage, displacing the last stable version; (2) the GitHub release badge (`img.shields.io/github/v/release/...`) picks up the pre-release version as if it were stable.
+
+Fix: pass `prerelease: bump === 'alpha' || bump === 'beta' || bump === 'rc'` and `make_latest: isPrerelease ? 'false' : 'true'` to `octokit.rest.repos.createRelease`. This keeps the last stable release pinned as "Latest" on the repo page while pre-release versions appear separately under "Releases". The pre-release channel label (`release:alpha/beta/rc`) is already available at the call site in `index.ts`.
+
 ---
 
 ## Testing
