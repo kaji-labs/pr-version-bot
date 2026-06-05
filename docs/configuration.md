@@ -402,6 +402,8 @@ When `'true'`, commits release files to a `release/{tag}` branch and opens a PR 
 
 Requires `pull-requests: write` permission on the workflow token.
 
+Also requires the repository to allow GitHub Actions to open pull requests: **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**. If this setting is off the action will emit a warning and exit cleanly — the tag and GitHub Release are still created successfully.
+
 See [docs/troubleshooting.md](troubleshooting.md#branch-protection-blocks-push) for setup instructions.
 
 ---

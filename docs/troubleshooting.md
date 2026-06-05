@@ -194,6 +194,8 @@ steps:
 
 In this mode, the action commits the release files to a `release/{tag}` branch and opens a PR against your target branch. The `release:none` label is automatically applied to the release PR to prevent recursive release triggering.
 
+**Also required:** GitHub must allow Actions to open PRs. Go to **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** and enable the checkbox. Without this the action will emit a warning and exit cleanly — the tag and GitHub Release are still created, but you will need to open the release PR manually.
+
 See [`examples/with-branch-protection.yml`](../examples/with-branch-protection.yml) for a complete workflow example.
 
 ---
